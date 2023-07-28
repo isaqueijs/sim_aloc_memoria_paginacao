@@ -20,4 +20,9 @@ public class Processo {
     public int getTamanho() {
         return tamanho;
     }
+
+    @Override
+    public String toString() {
+        return "Nome:" + nome + ", PID:" + pid + ", Tamanho:" + tamanho + "KB";
+    }
 }

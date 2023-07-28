@@ -1,57 +1,59 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
 public class Main {
+
+    public static int page_fault = 0;
     public static void main(String[] args) {
-        int tamanhoPagina = 4; // Tamanho de cada página
-        int tamanhoMemoria = 8; // Número total de páginas na memória
+        Scanner ler = new Scanner(System.in);
+        ArrayList<Processo> listaProcessos = new ArrayList<Processo>();
 
-        Memoria memoria = new Memoria(tamanhoPagina, tamanhoMemoria);
+        System.out.println("--------------------------------------------------------------\n"
+                + "Gerenciamento de Memória - Paginação" + "\n--------------------------------------------------------------");
 
-        // Criar processos (nome, pid, tamanho)
-        Processo processo1 = new Processo("Processo A", 1, 10);
-        Processo processo2 = new Processo("Processo B", 2, 8);
-        Processo processo3 = new Processo("Processo C", 3, 6);
-        Processo processo4 = new Processo("Processo D", 4, 12);
-        Processo processo5 = new Processo("Processo E", 5, 7);
+        System.out.print("Digite o tamanho de cada página (KB): ");
+        int tamanhoPagina = ler.nextInt();
 
-        // Simular solicitações de páginas (Processo, Número da Página)
-        int[][] solicitacoesPagina = {
-                {1, 0}, {2, 1}, {3, 2}, {1, 3}, {4, 4}, {2, 5}, {5, 6}, {6, 7},
-                {1, 1}, {2, 2}, {3, 3}, {4, 0}, {5, 5}, {6, 6}, {7, 7}, {8, 0}
-        };
+        System.out.print("Digite o tamanho da memória física (KB): ");
+        int tamanhoMemoria = ler.nextInt();
 
-        for (int[] solicitacao : solicitacoesPagina) {
-            int pid = solicitacao[0];
-            int numeroPagina = solicitacao[1];
+        System.out.print("Digite o tamanho da memória virtual (KB): ");
+        int tamanhoMemoriaVirtual = ler.nextInt();
 
-            Processo processo = null;
-            switch (pid) {
-                case 1:
-                    processo = processo1;
-                    break;
-                case 2:
-                    processo = processo2;
-                    break;
-                case 3:
-                    processo = processo3;
-                    break;
-                case 4:
-                    processo = processo4;
-                    break;
-                case 5:
-                    processo = processo5;
-                    break;
-                default:
-                    System.out.println("ID de Processo Inválido");
-            }
+        System.out.print("Digite o número de processos que deseja criar: ");
+        int qtdProcessos = ler.nextInt();
 
-            if (processo != null) {
-                if (memoria.paginaEstaNaMemoria(processo, numeroPagina)) {
-                    System.out.println("Página " + numeroPagina + " do " + processo.getNome() + " já está na memória.");
-                } else {
-                    System.out.println("Página " + numeroPagina + " do " + processo.getNome() + " não está na memória. Adicionando...");
-                    memoria.adicionarPaginaNaMemoria(processo, numeroPagina);
-                }
-                memoria.imprimirConteudoMemoria();
-            }
+        for (int i = 0; i < qtdProcessos; i++) {
+//			System.out.print("Digite o NOME do processo: ");
+            System.out.print("Digite o NOME, PID e TAMANHO (KB) do processo: ");
+            String nome = ler.next();
+//			System.out.print("Digite o ID do processo: ");
+            int id = ler.nextInt();
+//			System.out.print("Digite o TAMANHO do processo (KB): ");
+            int tamanhoProcesso = ler.nextInt();
+
+            listaProcessos.add(new Processo(nome, id, tamanhoProcesso));
         }
+        ler.close();
+        System.out.println("Pronto, " + qtdProcessos + " processos criados com sucesso!");
+
+        MemoriaVirtual memoriaVirtual = new MemoriaVirtual(tamanhoPagina, tamanhoMemoriaVirtual);
+        Memoria memoria = new Memoria(tamanhoPagina, tamanhoMemoria, memoriaVirtual);
+
+        memoria.imprimirConteudoMemoria();
+        memoriaVirtual.imprimirConteudoMemoriaVirtual();
+
+        System.out.println("--------------------------------------------------------------\n"
+                + "Agora vamos começar a alocar os processos"
+                + "\n--------------------------------------------------------------");
+
+        for (Processo processo : listaProcessos) {
+            System.out.println("\nAlocando Processo : " + processo.toString() + "...");
+            memoria.alocarProcesso(processo);
+            memoria.imprimirConteudoMemoria();
+            memoriaVirtual.imprimirConteudoMemoriaVirtual();
+        }
+
+        System.out.println("\nQuantidade de Page Faut: " + page_fault);
     }
 }
